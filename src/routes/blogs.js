@@ -59,7 +59,7 @@ module.exports = (db) => {
             } else {
                 _.unset(req.body, '_id');
                 _.unset(blog, '_id');
-                const updateBlog = await blogsCollection.replaceOne({ _id: id}, { ...blog, ...req.body });
+                const updateBlog = await blogsCollection.replaceOne({ _id: ObjectId(id)}, { ...blog, ...req.body });
                 res.json(updateBlog);
             }
         } catch (error) {
