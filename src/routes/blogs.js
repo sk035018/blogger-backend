@@ -10,7 +10,7 @@ module.exports = (db) => {
 
     blogsRouter.route('/create').post(authenticate(userCollection), async (req, res) => {
         try {
-            _.set(req.body, 'createdBy', req.user._id);
+            _.set(req.body, 'createdBy', ObjectId(req.user._id));
             const blog = await blogsCollection.insertOne(req.body);
             res.json(blog);
         } catch (error) {
@@ -21,7 +21,19 @@ module.exports = (db) => {
     blogsRouter.route('/getAll').get(authenticate(userCollection), async (req, res) => {
         try {
             const { skip = 0, limit = 20 } = req.query;
-            const blogs = await blogsCollection.find({}).skip(+skip).limit(+limit).toArray();
+            const blogs = await blogsCollection.aggregate([
+                { $lookup: {
+                    from: 'users',
+                    localField: 'createdBy',
+                    foreignField: '_id',
+                    as: 'author'
+                }},
+                { $unwind: '$author'},
+                { $project: { title: 1, subTitle: 1, body: 1, 'author.fullName': 1 }},
+                { $skip: +skip },
+                { $limit: +limit },
+            ]).toArray();
+
             res.json(blogs);
         } catch (error) {
             console.log(error);
