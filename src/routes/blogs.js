@@ -54,13 +54,12 @@ module.exports = (db) => {
         try {
             const { id } = req.params;
             const blog = await blogsCollection.findOne({ _id: ObjectId(id) });
-
-            if (req.user._id !== blog.createdBy) {
+            if (req.user._id !== blog.createdBy.toString()) {
                 res.json({ errMsg: 'Can\'t update other\'s blog' });
             } else {
                 _.unset(req.body, '_id');
                 _.unset(blog, '_id');
-                const updateBlog = await blogsCollection.replaceOne({ _id: ObjectId(id)}, { ...blog, ...req.body });
+                const updateBlog = await blogsCollection.replaceOne({ _id: id}, { ...blog, ...req.body });
                 res.json(updateBlog);
             }
         } catch (error) {
@@ -72,8 +71,7 @@ module.exports = (db) => {
         try {
             const { id } = req.params;
             const blog = await blogsCollection.findOne({ _id: ObjectId(id) });
-
-            if (req.user._id !== blog.createdBy) {
+            if (req.user._id !== blog.createdBy.toString()) {
                 res.json({ errMsg: 'Can\'t delete other\'s blog' });
             } else {
                 const deletedBlog = await blogsCollection.deleteOne({ _id: ObjectId(id) });
