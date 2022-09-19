@@ -21,7 +21,11 @@ const authenticate = (userCollection) => async (req, res, next) => {
             res.json({ errMsg: 'Unauthorized' });
         }
     } catch (error) {
-        console.log(error);
+        if (error.message === 'jwt malformed') {
+            res.json({ errMsg: 'Unauthorized' });
+        } else {
+            console.log(error);
+        }
     }
 };
 
